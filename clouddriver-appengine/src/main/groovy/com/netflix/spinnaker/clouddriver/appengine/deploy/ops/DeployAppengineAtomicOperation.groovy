@@ -205,7 +205,11 @@ class DeployAppengineAtomicOperation implements AtomicOperation<DeploymentResult
 
     task.updateStatus BASE_PHASE, "Deploying version $versionName..."
     try {
-      jobExecutor.runCommand(deployCommand)
+      if (containerDeployment) {
+        jobExecutor.runCommandWithCustomTimeout(deployCommand, 20)
+      } else {
+        jobExecutor.runCommand(deployCommand)
+      }
     } catch (e) {
       throw new AppengineOperationException("Failed to deploy to App Engine with command ${deployCommand.join(' ')}: ${e.getMessage()}")
     } finally {

@@ -40,7 +40,7 @@ class JobExecutorLocal implements JobExecutor {
   Map<String, Map> jobIdToHandlerMap = new ConcurrentHashMap<String, Map>()
 
   @Override
-  String startJob(JobRequest jobRequest, Map<String, String> environment, InputStream inputStream) {
+  String startJob(JobRequest jobRequest, Map<String, String> environment, InputStream inputStream, Long timeoutMins = timeoutMinutes) {
     log.debug("Starting job: '${String.join(' ', jobRequest.tokenizedCommand)}'...")
 
     String jobId = UUID.randomUUID().toString()
@@ -65,13 +65,13 @@ class JobExecutorLocal implements JobExecutor {
     }
 
     DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler()
-    ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutMinutes * 60 * 1000){
+    ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutMins * 60 * 1000){
       @Override
       void timeoutOccured(Watchdog w) {
         // If a watchdog is passed in, this was an actual time-out. Otherwise, it is likely
         // the result of calling watchdog.destroyProcess().
         if (w) {
-          log.warn("Job $jobId timed-out (after $timeoutMinutes minutes).")
+          log.warn("Job $jobId timed-out (after $timeoutMins minutes).")
           cancelJob(jobId)
         }
 

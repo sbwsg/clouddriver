@@ -38,6 +38,14 @@ class AppengineJobExecutor {
     waitForJobCompletion(jobId)
   }
 
+  void runCommandWithCustomTimeout(List<String> command, Long timeout) {
+    String jobId = jobExecutor.startJob(new JobRequest(tokenizedCommand: command),
+                                        System.getenv(),
+                                        new ByteArrayInputStream(),
+                                        timeout)
+    waitForJobCompletion(jobId)
+  }
+
   void waitForJobCompletion(String jobId) {
     sleep(sleepMs)
     JobStatus jobStatus = jobExecutor.updateJob(jobId)
